@@ -1,0 +1,67 @@
+# --- Python / FastAPI ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Alembic / DB ---
+alembic.ini
+*.db
+*.sqlite3
+
+# --- Node.js / Next.js ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.next/
+out/
+.next/cache/
+
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+
+# --- IDE & OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Docker ---
+.dockerignore
+
+# --- Build ---
+build/
+dist/
+
+# --- Logs ---
+logs/
+*.logpython/
+.idea/
+.env
+.env.local
+python/
+.idea/
+.env
+.env.local

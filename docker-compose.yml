@@ -1,0 +1,56 @@
+
+services:
+  # --- БЭКЕНД (FastAPI) ---
+  backend:
+    build: ./lot_now_backend
+    container_name: lot_now_backend
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
+    env_file:
+      - ./lot_now_backend/.env
+    depends_on:
+      - db
+    volumes:
+      - ./lot_now_backend:/app  # Для горячей перезагрузки кода при разработке
+    restart: unless-stopped
+    networks:
+      - lot_now_network
+
+  # --- ФРОНТЕНД (Next.js) ---
+  frontend:
+    build: ./lot_now_front
+    container_name: lot_now_frontend
+    ports:
+      - "3000:3000" # Next.js standalone запускается на порту 3000 внутри контейнера
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - lot_now_network
+
+  # --- БАЗА ДАННЫХ ---
+  db:
+    image: postgres:15-alpine
+    container_name: lot_now_db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./lot_now_backend/.env
+    restart: unless-stopped
+    networks:
+      - lot_now_network
+
+volumes:
+  postgres_data:
+
+networks:
+  lot_now_network:
+    driver: bridge

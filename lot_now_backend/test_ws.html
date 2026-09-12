@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <input id="token" placeholder="Вставь JWT токен" style="width:500px">
+    <br><br>
+    <button onclick="connect()">Подключиться</button>
+    <button onclick="sendBid()">Сделать ставку 12000</button>
+    <br><br>
+    <div id="messages"></div>
+
+<script>
+    let ws;
+
+    function connect() {
+        const token = document.getElementById("token").value;
+        ws = new WebSocket("ws://127.0.0.1:8001/ws/lots/3?token=" + token);
+        ws.onopen = () => log("Подключён!");
+        ws.onmessage = (e) => log("Получено: " + e.data);
+        ws.onclose = () => log("Отключён");
+        ws.onerror = (e) => log("Ошибка");
+    }
+
+    function sendBid() {
+        ws.send(JSON.stringify({
+            "type": "PLACE_BID",
+            "amount": 12000
+        }));
+    }
+
+    function log(msg) {
+        document.getElementById("messages").innerHTML += "<p>" + msg + "</p>";
+    }
+</script>
+</body>
+</html>
