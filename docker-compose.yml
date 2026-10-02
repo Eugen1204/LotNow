@@ -1,34 +1,64 @@
-
 services:
+  # --- NGINX (точка входа) ---
+  nginx:
+    image: nginx:alpine
+    container_name: lot_now_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - lot_now_network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   # --- БЭКЕНД (FastAPI) ---
   backend:
     build: ./lot_now_backend
     container_name: lot_now_backend
-    ports:
-      - "8001:8001"
+    expose:
+      - "8001"
     environment:
       - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
     env_file:
       - ./lot_now_backend/.env
     depends_on:
-      - db
-    volumes:
-      - ./lot_now_backend:/app  # Для горячей перезагрузки кода при разработке
+      db:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - lot_now_network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # --- ФРОНТЕНД (Next.js) ---
   frontend:
     build: ./lot_now_front
     container_name: lot_now_frontend
-    ports:
-      - "3000:3000" # Next.js standalone запускается на порту 3000 внутри контейнера
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
     depends_on:
       - backend
     restart: unless-stopped
     networks:
       - lot_now_network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # --- БАЗА ДАННЫХ ---
   db:
@@ -38,15 +68,24 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASS}
       - POSTGRES_DB=${DB_NAME}
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     env_file:
       - ./lot_now_backend/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
     networks:
       - lot_now_network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:

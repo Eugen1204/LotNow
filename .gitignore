@@ -65,3 +65,8 @@ python/
 .idea/
 .env
 .env.local
+
+*.tar.gz
+
+lot_now_backend/docs/screenshots
+
